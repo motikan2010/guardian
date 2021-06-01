@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asalih/guardian/data"
-	"github.com/asalih/guardian/models"
-	"github.com/asalih/guardian/waf/engine"
+	"github.com/motikan2010/guardian/data"
+	"github.com/motikan2010/guardian/models"
+	"github.com/motikan2010/guardian/waf/engine"
 )
 
 var staticSuffix = []string{".js", ".css", ".png", ".jpg", ".gif", ".bmp", ".svg", ".ico"}

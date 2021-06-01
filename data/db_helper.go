@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/asalih/guardian/models"
+	"github.com/motikan2010/guardian/models"
 	"github.com/google/uuid"
 
 	//_ ...

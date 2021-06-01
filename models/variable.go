@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/asalih/guardian/helpers"
+	"github.com/motikan2010/guardian/helpers"
 )
 
 //Variable definition for a rule

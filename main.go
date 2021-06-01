@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/asalih/guardian/models"
-	"github.com/asalih/guardian/waf/parser"
+	"github.com/motikan2010/guardian/models"
+	"github.com/motikan2010/guardian/waf/parser"
 )
 
 func init() {

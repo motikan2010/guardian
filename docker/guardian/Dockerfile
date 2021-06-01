@@ -1,7 +1,7 @@
 FROM golang
 
-RUN go get -x github.com/asalih/guardian
-WORKDIR /go/src/github.com/asalih/guardian
+RUN go get -x github.com/motikan2010/guardian
+WORKDIR /go/src/github.com/motikan2010/guardian
 RUN make
 
 ENV GUARDIAN_ENV=LIVE
@@ -16,7 +16,7 @@ RUN cp *.json workdir/ && \
     cp crs/*.data workdir/crs/ && \
     cp crs/*.conf workdir/crs
 
-WORKDIR /go/src/github.com/asalih/guardian/workdir
+WORKDIR /go/src/github.com/motikan2010/guardian/workdir
 CMD ["./guardian"]
 
 EXPOSE 80 443

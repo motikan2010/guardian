@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/asalih/guardian/waf/operators"
+	"github.com/motikan2010/guardian/waf/operators"
 
-	"github.com/asalih/guardian/models"
+	"github.com/motikan2010/guardian/models"
 )
 
 var xDirectives = []string{"SecAction", "SecArgumentSeparator", "SecAuditEngine", "SecAuditLog", "SecAuditLog2", "SecAuditLogDirMode",

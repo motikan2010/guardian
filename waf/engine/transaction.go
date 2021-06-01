@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/asalih/guardian/matches"
-	"github.com/asalih/guardian/waf/bodyprocessor"
+	"github.com/motikan2010/guardian/matches"
+	"github.com/motikan2010/guardian/waf/bodyprocessor"
 
-	"github.com/asalih/guardian/models"
+	"github.com/motikan2010/guardian/models"
 )
 
 //TransactionMaps global map variable object
