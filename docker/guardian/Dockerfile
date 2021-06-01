@@ -1,4 +1,4 @@
-FROM golang
+FROM golang:1.14
 
 RUN go get -x github.com/motikan2010/guardian
 WORKDIR /go/src/github.com/motikan2010/guardian

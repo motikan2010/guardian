@@ -1,25 +1,26 @@
 version: "3"
+
 services:
-    db:
-        image: postgres
-        ports:
-            - "5432:5432"
-        environment: 
-            POSTGRES_USER: guardian
-            POSTGRES_DB: guardiandb
-            POSTGRES_PASSWORD: 7eb12540045a4bc0b474a7efb91ebd39
+  db:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment: 
+      POSTGRES_USER: guardian
+      POSTGRES_DB: guardiandb
+      POSTGRES_PASSWORD: 7eb12540045a4bc0b474a7efb91ebd39
 
-    guardian:
-        depends_on:
-            - db
-        build: ./docker/guardian
-        ports:
-            - "80:80"
-            - "443:443"
+  guardian:
+    depends_on:
+      - db
+    build: ./docker/guardian
+    ports:
+      - "80:80"
+      - "443:443"
 
-    guardian_dashboard:
-        depends_on:
-            - db
-        build: ./docker/dashboard
-        ports:
-            - "8080:5000"
+  guardian_dashboard:
+    depends_on:
+      - db
+    build: ./docker/dashboard
+    ports:
+      - "8080:5000"
