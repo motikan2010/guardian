@@ -1,6 +1,6 @@
 package transformations
 
-import "github.com/asalih/guardian/helpers"
+import "github.com/motikan2010/guardian/helpers"
 
 func init() {
 	TransformationMaps.funcMap["htmlEntityDecode"] = func(variableData interface{}) interface{} {

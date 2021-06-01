@@ -9,8 +9,8 @@ import (
 
 	"golang.org/x/time/rate"
 
-	"github.com/asalih/guardian/data"
-	"github.com/asalih/guardian/models"
+	"github.com/motikan2010/guardian/data"
+	"github.com/motikan2010/guardian/models"
 
 	"golang.org/x/crypto/acme/autocert"
 )

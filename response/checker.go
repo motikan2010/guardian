@@ -6,11 +6,11 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/asalih/guardian/waf/bodyprocessor"
-	"github.com/asalih/guardian/waf/engine"
+	"github.com/motikan2010/guardian/waf/bodyprocessor"
+	"github.com/motikan2010/guardian/waf/engine"
 
-	"github.com/asalih/guardian/data"
-	"github.com/asalih/guardian/models"
+	"github.com/motikan2010/guardian/data"
+	"github.com/motikan2010/guardian/models"
 )
 
 //Checker Response checker

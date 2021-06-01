@@ -3,7 +3,7 @@ package models
 import (
 	"fmt"
 
-	"github.com/asalih/guardian/waf/transformations"
+	"github.com/motikan2010/guardian/waf/transformations"
 )
 
 //Action definition for Rules

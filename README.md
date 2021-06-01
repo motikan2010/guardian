@@ -30,3 +30,7 @@ There is [docker-compose.yml](docker-compose.yml) available. Builds the followin
 ## TODO
 -   General improvements & better testing
 -   Usecase
+
+## References
+
+- Original OSS : https://github.com/asalih/guardian

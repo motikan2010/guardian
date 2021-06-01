@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/asalih/guardian/helpers"
+	"github.com/motikan2010/guardian/helpers"
 
-	"github.com/asalih/guardian/waf/operators"
+	"github.com/motikan2010/guardian/waf/operators"
 )
 
 //InitDataFiles Data files initor

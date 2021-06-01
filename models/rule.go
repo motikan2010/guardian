@@ -3,9 +3,9 @@ package models
 import (
 	"fmt"
 
-	"github.com/asalih/guardian/waf/operators"
+	"github.com/motikan2010/guardian/waf/operators"
 
-	"github.com/asalih/guardian/matches"
+	"github.com/motikan2010/guardian/matches"
 )
 
 //SecRule VARIABLES OPERATOR [ACTIONS]

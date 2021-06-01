@@ -1,8 +1,8 @@
 package engine
 
 import (
-	"github.com/asalih/guardian/matches"
-	"github.com/asalih/guardian/waf/bodyprocessor"
+	"github.com/motikan2010/guardian/matches"
+	"github.com/motikan2010/guardian/waf/bodyprocessor"
 )
 
 func init() {

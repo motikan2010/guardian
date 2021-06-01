@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/asalih/guardian/helpers"
+	"github.com/motikan2010/guardian/helpers"
 )
 
 //HTTPLog represents http log

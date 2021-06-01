@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/asalih/guardian/waf/engine"
+	"github.com/motikan2010/guardian/waf/engine"
 
 	"net"
 	"net/http"
@@ -16,11 +16,11 @@ import (
 
 	"golang.org/x/crypto/acme/autocert"
 
-	"github.com/asalih/guardian/response"
+	"github.com/motikan2010/guardian/response"
 
-	"github.com/asalih/guardian/data"
-	"github.com/asalih/guardian/models"
-	"github.com/asalih/guardian/request"
+	"github.com/motikan2010/guardian/data"
+	"github.com/motikan2010/guardian/models"
+	"github.com/motikan2010/guardian/request"
 )
 
 var dialer = &net.Dialer{
