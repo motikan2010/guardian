@@ -3,8 +3,9 @@ package main
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"github.com/motikan2010/guardian/response"
 	"io"
+	"os"
 
 	"github.com/motikan2010/guardian/waf/engine"
 
@@ -13,10 +14,6 @@ import (
 
 	"net/url"
 	"time"
-
-	"golang.org/x/crypto/acme/autocert"
-
-	"github.com/motikan2010/guardian/response"
 
 	"github.com/motikan2010/guardian/data"
 	"github.com/motikan2010/guardian/models"
@@ -31,56 +28,17 @@ var dialer = &net.Dialer{
 
 /*GuardianHandler Guardian HTTPS Handler is the transport handler*/
 type GuardianHandler struct {
-	IsHTTPPortListener bool
-	CertManager        *autocert.Manager
-	IPRateLimiter      *models.IPRateLimiter
 }
 
 /*NewGuardianHandler Https Guardian handler init*/
-func NewGuardianHandler(isHTTPPortListener bool, certManager *autocert.Manager, ipRateLimiter *models.IPRateLimiter) *GuardianHandler {
-	return &GuardianHandler{isHTTPPortListener, certManager, ipRateLimiter}
+func NewGuardianHandler() *GuardianHandler {
+	return &GuardianHandler{}
 }
 
 func (h *GuardianHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	DB := data.NewDBHelper()
-
-	ipAddress := h.getIPAddress(r)
-
-	if !h.IPRateLimiter.IsAllowed(ipAddress) {
-		w.WriteHeader(http.StatusTooManyRequests)
-		fmt.Fprintf(w, "Too Many Requests. %s", url.QueryEscape(r.URL.Path))
-
-		go DB.LogThrottleRequest(ipAddress)
-
-		return
-	}
-
-	target := DB.GetTarget(r.Host)
-
-	if target == nil {
-		fmt.Fprintf(w, "Your application not authorized yet! Check your implementation. %s", r.URL.Path)
-		fmt.Println("Unauthorized Application requested." + r.Host + r.URL.Path)
-		fmt.Println(r)
-
-		return
-	}
-
-	if target.AutoCert && h.IsHTTPPortListener {
-		fmt.Println("AutoCert in progress. " + r.Host + r.URL.Path)
-		h.CertManager.HTTPHandler(nil).ServeHTTP(w, r)
-		return
-	}
-
-	if target.UseHTTPS && h.IsHTTPPortListener {
-		redirectToURI := "https://" + r.Host
-
-		if r.RequestURI != "" {
-			redirectToURI += r.RequestURI
-		}
-
-		http.Redirect(w, r, redirectToURI, 301)
-
-		return
+	target := &models.Target{
+		OriginIPAddress: os.Getenv("GUARDIAN_URL"),
+		WAFEnabled: true,
 	}
 
 	httpLog := models.NewHTTPLog()
@@ -97,18 +55,11 @@ func (h *GuardianHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	httpLog.OriginRequestStart()
 	uriToReq := r.Host
-
-	if target.Proto == 0 {
-		uriToReq = "http://" + uriToReq
-	} else {
-		uriToReq = "https://" + uriToReq
-	}
-
 	if r.RequestURI != "" {
 		uriToReq += r.RequestURI
 	}
 
-	transportResponse := h.transportRequest(uriToReq, w, requestChecker.Transaction, target)
+	transportResponse := h.transportRequest("http://" + uriToReq, w, requestChecker.Transaction, target)
 
 	if transportResponse == nil {
 		go h.logHTTPRequest(httpLog.Build(target, r, nil).NoResponse())
@@ -136,14 +87,12 @@ func (h *GuardianHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 //TransportRequest Transports the incoming request
-func (h *GuardianHandler) transportRequest(uriToReq string,
-	incomingWriter http.ResponseWriter,
-	transaction *engine.Transaction,
-	target *models.Target) *http.Response {
+func (h *GuardianHandler) transportRequest(uriToReq string, incomingWriter http.ResponseWriter,
+	transaction *engine.Transaction, target *models.Target) *http.Response {
 
-	var response *http.Response
-	var err error
+	var resp *http.Response
 	var req *http.Request
+	var err error
 
 	//timeout is 45 secs for to pass to origin server.
 	client := &http.Client{
@@ -151,13 +100,12 @@ func (h *GuardianHandler) transportRequest(uriToReq string,
 		Transport: &http.Transport{
 			DialContext: func(ctx context.Context, network, addr string) (net.Conn, error) {
 				//TODO: Check better solutions for dialcontext like timeouts.
-				uri, ferr := url.Parse(addr)
-				if ferr != nil {
-					panic(ferr)
+				uri, fErr := url.Parse("//" + addr)
+				if fErr != nil {
+					panic(fErr)
 				}
 
-				addr = target.OriginIPAddress + ":" + uri.Opaque
-
+				addr = target.OriginIPAddress + ":" + uri.Port()
 				return dialer.DialContext(ctx, network, addr)
 			},
 		},
@@ -178,14 +126,14 @@ func (h *GuardianHandler) transportRequest(uriToReq string,
 		req.Header.Set("X-Forwarded-For", fwIP)
 	}
 
-	response, err = client.Do(req)
+	resp, err = client.Do(req)
 
 	if err != nil {
 		http.Error(incomingWriter, err.Error(), http.StatusInternalServerError)
 		return nil
 	}
 
-	return response
+	return resp
 }
 
 func (h *GuardianHandler) transformResponse(incomingWriter http.ResponseWriter, incomingRequest *http.Request, response *http.Response) {

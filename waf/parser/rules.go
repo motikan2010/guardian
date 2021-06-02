@@ -2,16 +2,25 @@ package parser
 
 import (
 	"bufio"
+	"encoding/base64"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
+	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
-	"github.com/motikan2010/guardian/waf/operators"
-
 	"github.com/motikan2010/guardian/models"
 )
+
+type Rule struct {
+	RuleId int             `json:"rule_id"`
+	ConditionBase64 string `json:"condition_base64"`
+	Mode int               `json:"mode"`
+}
 
 var xDirectives = []string{"SecAction", "SecArgumentSeparator", "SecAuditEngine", "SecAuditLog", "SecAuditLog2", "SecAuditLogDirMode",
 	"SecAuditLogFormat", "SecAuditLogFileMode", "SecAuditLogParts", "SecAuditLogRelevantStatus", "SecAuditLogStorageDir",
@@ -31,28 +40,45 @@ var xDirectives = []string{"SecAction", "SecArgumentSeparator", "SecAuditEngine"
 
 //InitRulesCollection Rules data initializer
 func InitRulesCollection() {
-	files, _ := ioutil.ReadDir(operators.RulesAndDatasPath)
-
 	models.RulesCollection = make(map[int][]*models.Rule)
 
-	for _, v := range files {
-		if v.IsDir() || !strings.HasSuffix(v.Name(), ".conf") {
-			continue
-		}
-
-		InitRulesCollectionFile(operators.RulesAndDatasPath + v.Name())
+	req, err := http.NewRequest("GET", "http://host.docker.internal:8000/api/rule/get?application_token=" + os.Getenv("APPLICATION_TOKEN"), nil)
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	client := new(http.Client)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var rules []*Rule
+	if err := json.Unmarshal(body, &rules); err != nil {
+		log.Fatal("JSON Unmarshal error:", err)
+	}
+
+	for _, rule := range rules {
+		InitRulesCollectionFile(rule.RuleId, rule.ConditionBase64, rule.Mode)
+	}
+
 }
 
 //InitRulesCollectionFile Rules data initializer
-func InitRulesCollectionFile(path string) {
-	confFile, err := os.Open(path)
-
+func InitRulesCollectionFile(ruleId int, conditionBase64 string, mode int) {
+	fmt.Printf("InitRulesCollectionFile %d %d \n", ruleId, mode)
+	dec, err := base64.StdEncoding.DecodeString(conditionBase64)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
+	scanner := bufio.NewScanner(strings.NewReader(string(dec)))
 
-	scanner := bufio.NewScanner(confFile)
 	var plainTextRules []string
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -77,6 +103,9 @@ func InitRulesCollectionFile(path string) {
 		if strings.HasPrefix(row, "SecRule") {
 			var rule *models.Rule
 			rule, i = walk(plainTextRules, i, plainTextRulesLen)
+			if mode == 0 {
+				rule.Action.LogAction = models.ActionBlock
+			}
 			models.RulesCollection[int(rule.Action.Phase)] = append(models.RulesCollection[int(rule.Action.Phase)], rule)
 		}
 	}
@@ -269,5 +298,7 @@ func parseAction(action string) *models.Action {
 
 	}
 
-	return &models.Action{ID: idRegIdentified, Phase: models.Phase(phaseRegIdentified - 1), Transformations: transforms, DisruptiveAction: disrupAct, LogAction: models.LogActionLog}
+	detectAction := models.ActionLog // Default is logging only
+
+	return &models.Action{ID: idRegIdentified, Phase: models.Phase(phaseRegIdentified - 1), Transformations: transforms, DisruptiveAction: disrupAct, LogAction: detectAction}
 }

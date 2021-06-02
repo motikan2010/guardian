@@ -2,12 +2,12 @@ package request
 
 import (
 	"fmt"
+	"github.com/motikan2010/guardian/data"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
-	"github.com/motikan2010/guardian/data"
 	"github.com/motikan2010/guardian/models"
 	"github.com/motikan2010/guardian/waf/engine"
 )
@@ -66,12 +66,6 @@ func (r *Checker) handleWAFChecker(phase models.Phase) bool {
 
 		rulesInPhase := models.RulesCollection[int(phase)]
 
-		if phase == models.Phase2 {
-			//Client rules will be executed in phase2
-			db := data.NewDBHelper()
-			rulesInPhase = append(rulesInPhase, db.GetRequestFirewallRules(r.Target.ID)...)
-		}
-
 		for _, rule := range rulesInPhase {
 
 			//ruleStartTime := time.Now()
@@ -106,16 +100,19 @@ func (r *Checker) handleWAFChecker(phase models.Phase) bool {
 		panic("failed to execute rules.")
 	}
 
+	// Detect request
 	if r.ruleExecutionResult != nil && r.ruleExecutionResult.MatchResult.IsMatched {
-		r.ResponseWriter.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(r.ResponseWriter, "Bad Request. %s", url.QueryEscape(r.Transaction.Request.URL.Path))
 
-		if r.ruleExecutionResult.Rule.Action.LogAction == models.LogActionLog {
-			db := &data.DBHelper{}
-			go db.LogMatchResult(r.ruleExecutionResult, "TEMP", r.Target, r.Transaction.Request.RequestURI, false)
+		// Logging
+		db := &data.DBHelper{}
+		go db.LogMatchResult(r.ruleExecutionResult, r.ruleExecutionResult.Rule.Action.ID, r.Target, r.Transaction.Request.RequestURI, false)
+
+		if r.ruleExecutionResult.Rule.Action.LogAction == models.ActionBlock {
+			// Block
+			r.ResponseWriter.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(r.ResponseWriter, "Bad Request. %s", url.QueryEscape(r.Transaction.Request.URL.Path))
+			return true
 		}
-
-		return true
 	}
 
 	return false

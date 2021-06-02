@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.0
 RUN apt-get update
 RUN apt-get install -y git
 
-RUN git clone https://github.com/motikan2010/GuardianUI
+RUN git clone https://github.com/asalih/GuardianUI
 
 WORKDIR ./GuardianUI
 
