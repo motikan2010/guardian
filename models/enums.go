@@ -20,10 +20,8 @@ const (
 type LogAction uint8
 
 const (
-	//LogActionLog Log
-	LogActionLog LogAction = iota
-	//LogActionNoLog No log
-	LogActionNoLog
+	ActionLog LogAction = iota
+	ActionBlock LogAction = iota
 )
 
 //Phase WAF Rule check phase

@@ -1,22 +1,11 @@
-FROM golang:1.14
+FROM golang
 
-RUN go get -x github.com/motikan2010/guardian
-WORKDIR /go/src/github.com/motikan2010/guardian
-RUN make
+ADD workdir .
 
-ENV GUARDIAN_ENV=LIVE
-
-RUN sed -i 's,POSTGRES_PASSWORD,7eb12540045a4bc0b474a7efb91ebd39,g' appsettings.live.json && \
-    sed -i 's,POSTGRES_HOST,db,g' appsettings.live.json && \
+RUN sed -i 's,POSTGRES_HOST,db,g' appsettings.live.json && \
     sed -i 's,POSTGRES_USER,guardian,g' appsettings.live.json && \
     sed -i 's,POSTGRES_DB,guardiandb,g' appsettings.live.json
 
-RUN cp *.json workdir/ && \
-    mkdir -p workdir/crs && \
-    cp crs/*.data workdir/crs/ && \
-    cp crs/*.conf workdir/crs
-
-WORKDIR /go/src/github.com/motikan2010/guardian/workdir
 CMD ["./guardian"]
 
 EXPOSE 80 443
